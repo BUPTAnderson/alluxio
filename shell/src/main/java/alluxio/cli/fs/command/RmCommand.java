@@ -93,7 +93,7 @@ public final class RmCommand extends AbstractFileSystemCommand {
     }
     boolean isAlluxioOnly = cl.hasOption(REMOVE_ALLUXIO_ONLY.getLongOpt());
     DeletePOptions options =
-        DeletePOptions.newBuilder().setRecursive(recursive).setAlluxioOnly(isAlluxioOnly)
+        DeletePOptions.newBuilder().setRecursive(recursive).setAlluxioOnly(true)
             .setUnchecked(cl.hasOption(REMOVE_UNCHECKED_OPTION_CHAR)).build();
 
     mFileSystem.delete(path, options);

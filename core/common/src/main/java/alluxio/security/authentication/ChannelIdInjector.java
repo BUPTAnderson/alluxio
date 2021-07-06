@@ -11,6 +11,8 @@
 
 package alluxio.security.authentication;
 
+import alluxio.grpc.SaslMessage;
+import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
@@ -41,6 +43,25 @@ public final class ChannelIdInjector implements ClientInterceptor {
         @Override
         public UUID parseAsciiString(String serialized) {
           return UUID.fromString(serialized);
+        }
+      });
+
+  /** Metadata key for the channel Id. */
+  public static final Metadata.Key<SaslMessage> S_CLIENT_SASL_KEY =
+      Metadata.Key.of("sasl-key-bin", new Metadata.BinaryMarshaller<SaslMessage>() {
+        @Override
+        public byte[] toBytes(SaslMessage value) {
+          return value.toByteArray();
+        }
+
+        @Override
+        public SaslMessage parseBytes(byte[] serialized) {
+          try {
+            return SaslMessage.parseFrom(serialized);
+          } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+            return null;
+          }
         }
       });
 

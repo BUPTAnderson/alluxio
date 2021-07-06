@@ -156,6 +156,10 @@ public final class BlockMetadataManager {
           blockMeta.getBlockLocation().tierAlias()));
     }
     BlockMeta block = new DefaultBlockMeta(Preconditions.checkNotNull(tempBlockMeta));
+    if (block.getBlockSize() == 0L) {
+      LOG.warn("====================commitTempBlockMeta BlockId:{}, length:{}, path:{}",
+          blockId, block.getBlockSize(), block.getPath());
+    }
     StorageDir dir = tempBlockMeta.getParentDir();
     dir.removeTempBlockMeta(tempBlockMeta);
     dir.addBlockMeta(block);

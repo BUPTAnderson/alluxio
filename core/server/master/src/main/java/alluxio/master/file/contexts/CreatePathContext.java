@@ -19,17 +19,21 @@ import alluxio.grpc.TtlAction;
 import alluxio.grpc.WritePType;
 import alluxio.security.authorization.AclEntry;
 import alluxio.security.authorization.Mode;
+import alluxio.util.CommonUtils;
 import alluxio.util.SecurityUtils;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.GeneratedMessageV3;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+
+import static alluxio.Constants.USERNAME;
 
 /**
  * Wrapper for {@link CreateFilePOptions} or {@link CreateDirectoryPOptions} with additional context
@@ -79,6 +83,14 @@ public abstract class CreatePathContext<T extends GeneratedMessageV3.Builder<?>,
     if (SecurityUtils.isAuthenticationEnabled(ServerConfiguration.global())) {
       mOwner = SecurityUtils.getOwnerFromGrpcClient(ServerConfiguration.global());
       mGroup = SecurityUtils.getGroupFromGrpcClient(ServerConfiguration.global());
+    } else {
+      mOwner = System.getProperty(USERNAME);
+      try {
+        mGroup = CommonUtils.getPrimaryGroupName(mOwner, ServerConfiguration.global());
+      } catch (IOException e) {
+        e.printStackTrace();
+        mGroup = mOwner;
+      }
     }
     // Initialize mPersisted based on proto write type.
     WritePType writeType = WritePType.NONE;

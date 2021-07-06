@@ -33,6 +33,7 @@ import alluxio.grpc.CreateDirectoryPOptions;
 import alluxio.grpc.CreateFilePOptions;
 import alluxio.grpc.DeletePOptions;
 import alluxio.grpc.SetAttributePOptions;
+import alluxio.hadoop.security.TokenUtils;
 import alluxio.master.MasterInquireClient.Factory;
 import alluxio.security.CurrentUser;
 import alluxio.security.authorization.Mode;
@@ -696,6 +697,11 @@ public abstract class AbstractFileSystem extends org.apache.hadoop.fs.FileSystem
     } else {
       mWorkingDir = new Path(mWorkingDir, path);
     }
+  }
+
+  @Override
+  public String getCanonicalServiceName() {
+    return TokenUtils.buildTokenService(getUri(), mFileSystem.getConf());
   }
 
   /**

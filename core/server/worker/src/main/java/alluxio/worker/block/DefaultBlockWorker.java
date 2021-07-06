@@ -320,6 +320,10 @@ public class DefaultBlockWorker extends AbstractWorker implements BlockWorker {
       Long length = meta.getBlockSize();
       BlockStoreMeta storeMeta = mLocalBlockStore.getBlockStoreMeta();
       Long bytesUsedOnTier = storeMeta.getUsedBytesOnTiers().get(loc.tierAlias());
+      if (length == 0L) {
+        LOG.warn("==========commitBlock WorkerId:{}, bytesUsedOnTier:{}, blockId:{}, length:{}",
+            mWorkerId.get(), bytesUsedOnTier, blockId, length);
+      }
       blockMasterClient.commitBlock(mWorkerId.get(), bytesUsedOnTier, loc.tierAlias(), mediumType,
           blockId, length);
     } catch (Exception e) {

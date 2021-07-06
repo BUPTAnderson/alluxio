@@ -12,7 +12,9 @@
 package alluxio.extensions;
 
 import alluxio.conf.AlluxioConfiguration;
+import alluxio.conf.InstancedConfiguration;
 import alluxio.conf.PropertyKey;
+import alluxio.util.ConfigurationUtils;
 import alluxio.util.ExtensionUtils;
 import alluxio.util.io.PathUtils;
 
@@ -109,6 +111,11 @@ public class ExtensionFactoryRegistry<T extends ExtensionFactory<?, S>,
           factory);
       register(factory);
     }
+
+    InstancedConfiguration configuration =
+        new InstancedConfiguration(ConfigurationUtils.defaults());
+    String libDir = PathUtils.concatPath(configuration.get(PropertyKey.HOME), "lib");
+    scanLibs(mFactories, libDir);
   }
 
   /**
@@ -131,9 +138,9 @@ public class ExtensionFactoryRegistry<T extends ExtensionFactory<?, S>,
     Preconditions.checkArgument(path != null, "path may not be null");
 
     List<T> factories = new ArrayList<>(mFactories);
-    String libDir = PathUtils.concatPath(conf.get(PropertyKey.HOME), "lib");
+
     String extensionDir = conf.get(PropertyKey.EXTENSIONS_DIR);
-    scanLibs(factories, libDir);
+
     scanExtensions(factories, extensionDir);
 
     List<T> eligibleFactories = new ArrayList<>();
@@ -220,7 +227,7 @@ public class ExtensionFactoryRegistry<T extends ExtensionFactory<?, S>,
    *
    * @param factory factory to register
    */
-  public void register(T factory) {
+  public synchronized void register(T factory) {
     register(factory, mFactories);
   }
 
@@ -233,6 +240,12 @@ public class ExtensionFactoryRegistry<T extends ExtensionFactory<?, S>,
 
     // Insert at start of list so it will take precedence over automatically discovered and
     // previously registered factories
+    factories.stream().filter(f -> f.getClass().getName().equals(factory.getClass().getName()))
+        .forEach(f -> LOG.warn(
+            "factory: {}-{} already loaded before, there are more than one {} in jars.",
+            f.getClass().getName(), f.hashCode(), f.getClass().getName())
+        );
+
     factories.add(0, factory);
   }
 

@@ -116,7 +116,7 @@ public class FileSystemOptions {
    */
   public static DeletePOptions deleteDefaults(AlluxioConfiguration conf) {
     return DeletePOptions.newBuilder()
-        .setAlluxioOnly(false)
+        .setAlluxioOnly(true)
         .setCommonOptions(commonDefaults(conf))
         .setRecursive(false)
         .setUnchecked(conf.getBoolean(PropertyKey.USER_FILE_DELETE_UNCHECKED))

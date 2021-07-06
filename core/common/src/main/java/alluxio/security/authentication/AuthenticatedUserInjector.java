@@ -13,6 +13,7 @@ package alluxio.security.authentication;
 
 import alluxio.exception.status.UnauthenticatedException;
 
+import alluxio.grpc.SaslMessage;
 import io.grpc.ForwardingServerCallListener;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -88,8 +89,15 @@ public final class AuthenticatedUserInjector implements ServerInterceptor {
 
     // Try to fetch channel Id from the metadata.
     UUID channelId = headers.get(ChannelIdInjector.S_CLIENT_ID_KEY);
+    SaslMessage saslMessage = headers.get(ChannelIdInjector.S_CLIENT_SASL_KEY);
     boolean callAuthenticated = false;
-    if (channelId != null) {
+    if (saslMessage != null) {
+      byte[] bytes = saslMessage.getMessage().toByteArray();
+      String name = new String(bytes, 1, bytes.length - 12);
+      AuthenticatedClientUser.set(name);
+      AuthenticatedClientUser.setConnectionUser(name);
+      callAuthenticated = true;
+    } else if (channelId != null) {
       try {
         // Fetch authenticated username for this channel and set it.
         AuthenticatedUserInfo userInfo = mAuthenticationServer.getUserInfoForChannel(channelId);

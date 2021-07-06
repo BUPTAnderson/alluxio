@@ -70,6 +70,8 @@ public abstract class AbstractClient implements Client {
   /** Used to query service version for the remote service type. */
   protected ServiceVersionClientServiceGrpc.ServiceVersionClientServiceBlockingStub mVersionService;
 
+  protected boolean mVersionCheckInable;
+
   /** Is true if this client is currently connected. */
   protected boolean mConnected = false;
 
@@ -115,6 +117,7 @@ public abstract class AbstractClient implements Client {
     mRetryPolicySupplier = retryPolicySupplier;
     mServiceVersion = Constants.UNKNOWN_SERVICE_VERSION;
     mRpcThreshold = mContext.getClusterConf().getMs(PropertyKey.USER_LOGGING_THRESHOLD);
+    mVersionCheckInable = mContext.getClusterConf().getBoolean(PropertyKey.VERSION_CHECK_ENABLE);
   }
 
   /**
@@ -229,11 +232,15 @@ public abstract class AbstractClient implements Client {
             .setSubject(mContext.getSubject())
             .setClientType(getServiceName())
             .build();
-        // Create stub for version service on host
-        mVersionService = ServiceVersionClientServiceGrpc.newBlockingStub(mChannel);
+        if (mVersionCheckInable) {
+          // Create stub for version service on host
+          mVersionService = ServiceVersionClientServiceGrpc.newBlockingStub(mChannel);
+          checkVersion(getServiceVersion());
+        } else {
+          mServiceVersion = getServiceVersion();
+        }
         mConnected = true;
         afterConnect();
-        checkVersion(getServiceVersion());
         LOG.debug("Alluxio client (version {}) is connected with {} @ {}", RuntimeConstants.VERSION,
             getServiceName(), mAddress);
         return;
@@ -379,8 +386,8 @@ public abstract class AbstractClient implements Client {
       long duration = System.currentTimeMillis() - startMs;
       logger.debug("Exit (OK): {}({}) in {} ms", rpcName, debugDesc, duration);
       if (duration >= mRpcThreshold) {
-        logger.warn("{}({}) returned {} in {} ms (>={} ms)",
-            rpcName, String.format(description, args), ret, duration, mRpcThreshold);
+        logger.warn("{}({}) in {} ms (>={} ms)",
+            rpcName, String.format(description, args), duration, mRpcThreshold);
       }
       return ret;
     } catch (Exception e) {

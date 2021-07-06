@@ -113,6 +113,8 @@ public class FileSystemContext implements Closeable {
   @GuardedBy("this")
   private boolean mMetricsEnabled;
 
+  private boolean mContextReinitEnable;
+
   //
   // Master related resources.
   //
@@ -244,6 +246,7 @@ public class FileSystemContext implements Closeable {
     mBlockWorker = blockWorker;
     mWorkerRefreshPolicy =
         new TimeoutRefresh(conf.getMs(PropertyKey.USER_WORKER_LIST_REFRESH_INTERVAL));
+    mContextReinitEnable = conf.getBoolean(PropertyKey.CONTEXT_REINITIALIZE_ENABLE);
     LOG.debug("Created context with id: {}, with local block worker: {}",
         mId, mBlockWorker == null);
   }
@@ -256,7 +259,9 @@ public class FileSystemContext implements Closeable {
   private synchronized void init(ClientContext clientContext,
       MasterInquireClient masterInquireClient) {
     initContext(clientContext, masterInquireClient);
-    mReinitializer = new FileSystemContextReinitializer(this);
+    if (mContextReinitEnable) {
+      mReinitializer = new FileSystemContextReinitializer(this);
+    }
   }
 
   private synchronized void initContext(ClientContext ctx,
@@ -283,7 +288,9 @@ public class FileSystemContext implements Closeable {
    */
   public synchronized void close() throws IOException {
     LOG.debug("Closing context with id: {}", mId);
-    mReinitializer.close();
+    if (mContextReinitEnable) {
+      mReinitializer.close();
+    }
     closeContext();
     LOG.debug("Closed context with id: {}", mId);
   }
@@ -340,6 +347,9 @@ public class FileSystemContext implements Closeable {
    * @return the resource
    */
   public ReinitBlockerResource blockReinit() {
+    if (!mContextReinitEnable) {
+      return null;
+    }
     try {
       return mReinitializer.block();
     } catch (InterruptedException e) {
@@ -366,6 +376,9 @@ public class FileSystemContext implements Closeable {
    */
   public void reinit(boolean updateClusterConf, boolean updatePathConf)
       throws UnavailableException, IOException {
+    if (!mContextReinitEnable) {
+      return;
+    }
     try (Closeable r = mReinitializer.allow()) {
       InetSocketAddress masterAddr;
       try {

@@ -44,11 +44,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -67,6 +70,16 @@ public abstract class ObjectUnderFileSystem extends BaseUnderFileSystem {
 
   /** Value used to indicate nested structure. */
   protected static final char PATH_SEPARATOR_CHAR = '/';
+
+  /** mime types, ignore ai bin */
+  protected static final Set<String> mimeTypes = Stream.of(
+      "3g2", "3gp", "7z", "aac", "abw", "arc", "avi", "azw", "bmp", "bz", "bz2", "csh", "css",
+      "csv", "doc", "docx", "eot", "epub", "gif", "htm", "html", "ico", "ics", "jar", "jpeg",
+      "jpg", "js", "json", "jsonld", "mid", "midi", "mjs", "mp3", "mpeg", "mpkg", "odp", "ods",
+      "odt", "oga", "ogv", "ogx", "otf", "pdf", "png", "ppt", "pptx", "rar", "rtf", "sh", "svg",
+      "swf", "tar", "tif", "tiff", "ttf", "txt", "vsd", "wav", "weba", "webm", "webp", "woff",
+      "woff2", "xhtml", "xls", "xlsx", "xml", "xul", "zip")
+      .collect(Collectors.toUnmodifiableSet());
 
   /**
    * Value used to indicate nested structure. This is a string representation of
@@ -550,9 +563,6 @@ public abstract class ObjectUnderFileSystem extends BaseUnderFileSystem {
 
   @Override
   public UfsStatus getStatus(String path) throws IOException {
-    if (isRoot(path)) {
-      return getDirectoryStatus(path);
-    }
     ObjectStatus details = getObjectStatus(stripPrefixIfPresent(path));
     if (details != null) {
       ObjectPermissions permissions = getPermissions();
@@ -575,6 +585,19 @@ public abstract class ObjectUnderFileSystem extends BaseUnderFileSystem {
     if (isRoot(path)) {
       return true;
     }
+
+    // mime types max length is 7(jsonld), with '.', we only check until path.length() - 8.
+    int typeIndex = -1, end = Math.max(path.length() - 8, -1);
+    for (int i = path.length() - 1; i > end; i--) {
+      if (path.charAt(i) == '.') {
+        typeIndex = i;
+        break;
+      }
+    }
+    if (typeIndex > -1 && mimeTypes.contains(path.substring(typeIndex + 1).toLowerCase())) {
+      return false;
+    }
+
     String keyAsFolder = convertToFolderName(stripPrefixIfPresent(path));
     if (getObjectStatus(keyAsFolder) != null) {
       return true;

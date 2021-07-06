@@ -265,8 +265,8 @@ public class BlockReadHandler implements StreamObserver<alluxio.grpc.ReadRequest
           || mContext.isCancel()) {
         return;
       }
-      mContext.setCancel(true);
       if (!mContext.isDataReaderActive()) {
+        mContext.setCancel(true);
         mContext.setDataReaderActive(true);
         createDataReader(mContext, mResponseObserver).run();
       }

@@ -11,6 +11,8 @@
 
 package alluxio.job.util;
 
+import alluxio.job.JobConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 
 import java.io.ByteArrayInputStream;
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.StreamCorruptedException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -30,6 +33,7 @@ import javax.annotation.concurrent.ThreadSafe;
  */
 @ThreadSafe
 public final class SerializationUtils {
+  private static ObjectMapper mapper = new ObjectMapper();
   private SerializationUtils() {} // prevent instantiation
 
   /**
@@ -83,6 +87,19 @@ public final class SerializationUtils {
       try (ObjectInputStream o = new ObjectInputStream(b)) {
         return (Serializable) o.readObject();
       }
+    }
+  }
+
+  public static JobConfig jobConfigDeserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+    if (bytes == null) {
+      return null;
+    }
+    try (ByteArrayInputStream b = new ByteArrayInputStream(bytes)) {
+      try (ObjectInputStream o = new ObjectInputStream(b)) {
+        return (JobConfig) o.readObject();
+      }
+    } catch (StreamCorruptedException e) {
+      return mapper.readValue(bytes, JobConfig.class);
     }
   }
 

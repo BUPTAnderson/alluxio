@@ -730,7 +730,8 @@ public class UnderFileSystemWithLogging implements UnderFileSystem {
     return call(new UfsCallable<UfsStatus[]>() {
       @Override
       public UfsStatus[] call() throws IOException {
-        return filterInvalidPaths(mUnderFileSystem.listStatus(path), path);
+        return mUnderFileSystem.listStatus(path);
+//        return filterInvalidPaths(mUnderFileSystem.listStatus(path), path);
       }
 
       @Override
@@ -751,7 +752,8 @@ public class UnderFileSystemWithLogging implements UnderFileSystem {
     return call(new UfsCallable<UfsStatus[]>() {
       @Override
       public UfsStatus[] call() throws IOException {
-        return filterInvalidPaths(mUnderFileSystem.listStatus(path, options), path);
+        return mUnderFileSystem.listStatus(path, options);
+//        return filterInvalidPaths(mUnderFileSystem.listStatus(path, options), path);
       }
 
       @Override

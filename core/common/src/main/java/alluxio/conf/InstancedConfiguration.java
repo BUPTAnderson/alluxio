@@ -86,7 +86,11 @@ public class InstancedConfiguration implements AlluxioConfiguration {
    */
   public InstancedConfiguration(AlluxioProperties properties) {
     mProperties = properties;
-    mClusterDefaultsLoaded = false;
+    if (Boolean.parseBoolean(mProperties.get(PropertyKey.CONTEXT_REINITIALIZE_ENABLE))) {
+      mClusterDefaultsLoaded = false;
+    } else {
+      mClusterDefaultsLoaded = true;
+    }
   }
 
   /**

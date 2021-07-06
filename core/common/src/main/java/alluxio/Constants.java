@@ -151,6 +151,7 @@ public final class Constants {
 
   public static final String IMPERSONATION_HDFS_USER = "_HDFS_USER_";
   public static final String IMPERSONATION_NONE = "_NONE_";
+  public static final String USERNAME = "user.name";
 
   public static final String MODE_BITS_NONE = "---";
   public static final String MODE_BITS_EXECUTE = "--x";

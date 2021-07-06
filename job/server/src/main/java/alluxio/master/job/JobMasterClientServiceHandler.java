@@ -28,7 +28,6 @@ import alluxio.grpc.ListAllPRequest;
 import alluxio.grpc.ListAllPResponse;
 import alluxio.grpc.RunPRequest;
 import alluxio.grpc.RunPResponse;
-import alluxio.job.JobConfig;
 import alluxio.job.util.SerializationUtils;
 import alluxio.job.wire.JobInfo;
 import alluxio.job.wire.JobWorkerHealth;
@@ -114,7 +113,7 @@ public class JobMasterClientServiceHandler
       try {
         byte[] jobConfigBytes = request.getJobConfig().toByteArray();
         return RunPResponse.newBuilder()
-            .setJobId(mJobMaster.run((JobConfig) SerializationUtils.deserialize(jobConfigBytes)))
+            .setJobId(mJobMaster.run(SerializationUtils.jobConfigDeserialize(jobConfigBytes)))
             .build();
       } catch (ClassNotFoundException e) {
         throw new InvalidArgumentException(e);

@@ -4983,6 +4983,51 @@ public final class PropertyKey implements Comparable<PropertyKey> {
           .setDefaultValue("3.3.0")
           .setIsHidden(true)
           .build();
+  public static final PropertyKey CONTEXT_REINITIALIZE_ENABLE =
+      new Builder(Name.CONTEXT_REINITIALIZE_ENABLE)
+          .setDefaultValue(true)
+          .setDescription("Whether filesystem context reinitialize are enabled for alluxio.")
+          .setConsistencyCheckLevel(ConsistencyCheckLevel.ENFORCE)
+          .setScope(Scope.ALL)
+          .build();
+  public static final PropertyKey VERSION_CHECK_ENABLE =
+      new Builder(Name.VERSION_CHECK_ENABLE)
+          .setDefaultValue(true)
+          .setDescription("Whether check alluxio version with alluxio master before rpc call.")
+          .setConsistencyCheckLevel(ConsistencyCheckLevel.ENFORCE)
+          .setScope(Scope.ALL)
+          .build();
+
+  // security
+  public static final PropertyKey SECURITY_KERBEROS_SERVER_PRINCIPAL =
+      new Builder(Name.SECURITY_KERBEROS_SERVER_PRINCIPAL)
+          .setScope(Scope.SERVER)
+          .build();
+  public static final PropertyKey SECURITY_KERBEROS_SERVER_KEYTAB_FILE =
+      new Builder(Name.SECURITY_KERBEROS_SERVER_KEYTAB_FILE)
+          .setScope(Scope.SERVER)
+          .build();
+  public static final PropertyKey SECURITY_KERBEROS_CLIENT_PRINCIPAL =
+      new Builder(Name.SECURITY_KERBEROS_CLIENT_PRINCIPAL)
+          .setScope(Scope.CLIENT)
+          .build();
+  public static final PropertyKey SECURITY_KERBEROS_CLIENT_KEYTAB_FILE =
+      new Builder(Name.SECURITY_KERBEROS_CLIENT_KEYTAB_FILE)
+          .setScope(Scope.CLIENT)
+          .build();
+  public static final PropertyKey SECURITY_UNDERFS_HDFS_IMPERSONATION_ENABLED =
+      new Builder(Name.SECURITY_UNDERFS_HDFS_IMPERSONATION_ENABLED)
+          .setScope(Scope.ALL)
+          .setDefaultValue(true)
+          .build();
+  public static final PropertyKey SECURITY_UNDERFS_HDFS_KERBEROS_CLIENT_PRINCIPAL =
+      new Builder(Name.SECURITY_UNDERFS_HDFS_KERBEROS_CLIENT_PRINCIPAL)
+          .setScope(Scope.ALL)
+          .build();
+  public static final PropertyKey SECURITY_UNDERFS_HDFS_KERBEROS_CLIENT_KEYTAB_FILE =
+      new Builder(Name.SECURITY_UNDERFS_HDFS_KERBEROS_CLIENT_KEYTAB_FILE)
+          .setScope(Scope.ALL)
+          .build();
 
   //
   // Job service
@@ -5304,6 +5349,8 @@ public final class PropertyKey implements Comparable<PropertyKey> {
         "alluxio.integration.yarn.workers.per.host.max";
     public static final String LOGGER_TYPE = "alluxio.logger.type";
     public static final String LOGS_DIR = "alluxio.logs.dir";
+    public static final String CONTEXT_REINITIALIZE_ENABLE = "alluxio.context.reinitialize.enable";
+    public static final String VERSION_CHECK_ENABLE = "alluxio.version.check.enable";
     public static final String METRICS_CONF_FILE = "alluxio.metrics.conf.file";
     public static final String METRICS_CONTEXT_SHUTDOWN_TIMEOUT =
         "alluxio.metrics.context.shutdown.timeout";
@@ -6245,6 +6292,36 @@ public final class PropertyKey implements Comparable<PropertyKey> {
     public static final String SECURITY_LOGIN_USERNAME = "alluxio.security.login.username";
     public static final String AUTHENTICATION_INACTIVE_CHANNEL_REAUTHENTICATE_PERIOD =
         "alluxio.security.stale.channel.purge.interval";
+    public static final String SECURITY_KERBEROS_CLIENT_PRINCIPAL =
+        "alluxio.security.kerberos.client.principal";
+    public static final String SECURITY_KERBEROS_CLIENT_KEYTAB_FILE =
+        "alluxio.security.kerberos.client.keytab.file";
+    public static final String SECURITY_KERBEROS_CLIENT_TICKETCACHE_LOGIN_ENABLED =
+        "alluxio.security.kerberos.client.ticketcache.login.enabled";
+    public static final String SECURITY_UNDERFS_HDFS_IMPERSONATION_ENABLED =
+        "alluxio.security.underfs.hdfs.impersonation.enabled";
+    public static final String SECURITY_UNDERFS_HDFS_KERBEROS_CLIENT_PRINCIPAL =
+        "alluxio.security.underfs.hdfs.kerberos.client.principal";
+    public static final String SECURITY_UNDERFS_HDFS_KERBEROS_CLIENT_KEYTAB_FILE =
+        "alluxio.security.underfs.hdfs.kerberos.client.keytab.file";
+    public static final String SECURITY_KERBEROS_UNIFIED_INSTANCE_NAME =
+        "alluxio.security.kerberos.unified.instance.name";
+    public static final String SECURITY_KERBEROS_AUTH_TO_LOCAL =
+        "alluxio.security.kerberos.auth.to.local";
+    public static final String SECURITY_KERBEROS_SERVER_PRINCIPAL =
+        "alluxio.security.kerberos.server.principal";
+    public static final String SECURITY_KERBEROS_SERVER_KEYTAB_FILE =
+        "alluxio.security.kerberos.server.keytab.file";
+    public static final String SECURITY_KERBEROS_JOB_SERVER_PRINCIPAL =
+        "alluxio.security.kerberos.job.server.principal";
+    public static final String SECURITY_KERBEROS_JOB_SERVER_KEYTAB_FILE =
+        "alluxio.security.kerberos.job.server.keytab.file";
+    public static final String SECURITY_AUTHORIZATION_ACCESS_ENABLED =
+        "alluxio.security.authorization.access.enabled";
+    public static final String SECURITY_AUTHORIZATION_ACCESS_LIFETIME_MS =
+        "alluxio.security.authorization.access.lifetime.ms";
+    public static final String SECURITY_AUTHORIZATION_ACCESS_KEY_LIFETIME_MS =
+        "alluxio.security.authorization.access.key.lifetime.ms";
 
     //
     // Job service

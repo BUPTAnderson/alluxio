@@ -157,7 +157,7 @@ public final class ZkMasterInquireClient implements MasterInquireClient, Closeab
                 leader = master;
               }
             }
-            LOG.debug("The leader master: {}", leader);
+            LOG.info("The leader master: {}", leader);
             return NetworkAddressUtils.parseInetSocketAddress(leader);
           }
         } else {
@@ -171,7 +171,7 @@ public final class ZkMasterInquireClient implements MasterInquireClient, Closeab
       LOG.error("Error getting the leader master address from zookeeper. Zookeeper: {}",
           mConnectDetails, e);
     } finally {
-      LOG.debug("Finished getPrimaryRpcAddress() in {}ms", System.currentTimeMillis() - startTime);
+      LOG.info("Finished getPrimaryRpcAddress() in {}ms", System.currentTimeMillis() - startTime);
     }
 
     throw new UnavailableException("Failed to determine primary master rpc address");

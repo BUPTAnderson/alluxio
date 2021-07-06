@@ -127,7 +127,7 @@ public class BlockInStream extends InputStream implements BoundedStream, Seekabl
     // 3. the worker's domain socket is not configured
     //      OR alluxio.user.short.circuit.preferred is true
     if (sourceIsLocal && shortCircuit && (shortCircuitPreferred || !sourceSupportsDomainSocket)) {
-      LOG.debug("Creating short circuit input stream for block {} @ {}", blockId, dataSource);
+      LOG.info("Creating short circuit input stream for block {} @ {}", blockId, dataSource);
       try {
         return createLocalBlockInStream(context, dataSource, blockId, blockSize, options);
       } catch (NotFoundException e) {
@@ -139,7 +139,7 @@ public class BlockInStream extends InputStream implements BoundedStream, Seekabl
     }
 
     // gRPC
-    LOG.debug("Creating gRPC input stream for block {} @ {} from client {} reading through {}",
+    LOG.info("Creating gRPC input stream for block {} @ {} from client {} reading through {}",
         blockId, dataSource, NetworkAddressUtils.getClientHostName(alluxioConf), dataSource);
     return createGrpcBlockInStream(context, dataSource, dataSourceType, blockId,
         blockSize, options);

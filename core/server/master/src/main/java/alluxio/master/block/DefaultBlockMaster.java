@@ -699,8 +699,10 @@ public class DefaultBlockMaster extends CoreMaster implements BlockMaster {
   public void commitBlock(long workerId, long usedBytesOnTier, String tierAlias,
       String mediumType, long blockId, long length)
       throws NotFoundException, UnavailableException {
-    LOG.debug("Commit block from workerId: {}, usedBytesOnTier: {}, blockId: {}, length: {}",
-        workerId, usedBytesOnTier, blockId, length);
+    if (length == 0L) {
+      LOG.warn("====Commit block from workerId: {}, usedBytesOnTier: {}, blockId: {}, length: {}",
+          workerId, usedBytesOnTier, blockId, length);
+    }
 
     MasterWorkerInfo worker = mWorkers.getFirstByField(ID_INDEX, workerId);
     // TODO(peis): Check lost workers as well.

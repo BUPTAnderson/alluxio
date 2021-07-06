@@ -15,14 +15,27 @@ import alluxio.util.io.PathUtils;
 
 import com.google.common.primitives.Longs;
 import org.rocksdb.RocksIterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
 
 /**
  * Convenience methods for working with RocksDB.
  */
 public final class RocksUtils {
+  private static final Logger LOG = LoggerFactory.getLogger(RocksUtils.class);
+  private static final Object LOCK = new Object();
+
+  private static final long S_ARRAY_BYTE_BASE_OFFSET = (long) ARRAY_BYTE_BASE_OFFSET;
+  private static Unsafe sUnsafe;
 
   private RocksUtils() {} // Utils class.
 
@@ -83,6 +96,30 @@ public final class RocksUtils {
   }
 
   /**
+   * Fetches a long value from an array of bytes.
+   *
+   * @param bytes an array of bytes
+   * @return the long value
+   */
+  public static long readLongPrefix(byte[] bytes) {
+    if (sUnsafe == null) {
+      synchronized (LOCK) {
+        if (sUnsafe == null) {
+          Field unsafeField = Unsafe.class.getDeclaredFields()[0];
+          unsafeField.setAccessible(true);
+          try {
+            sUnsafe = (Unsafe) unsafeField.get(null);
+          } catch (IllegalAccessException e) {
+            LOG.warn("Failed to create Unsafe instance:{}", e.toString());
+            return ByteBuffer.wrap(bytes, 0, 8).order(ByteOrder.LITTLE_ENDIAN).getLong();
+          }
+        }
+      }
+    }
+    return sUnsafe.getLong(bytes, S_ARRAY_BYTE_BASE_OFFSET);
+  }
+
+  /**
    * Used to parse current {@link RocksIterator} element.
    *
    * @param <T> return type of parser's next method
@@ -121,15 +158,15 @@ public final class RocksUtils {
       public T next() {
         try {
           return parser.next(rocksIterator);
-        } catch (Exception exc) {
+        } catch (Throwable exc) {
           rocksIterator.close();
           valid.set(false);
+          LOG.error("Rocks");
+          exc.printStackTrace();
           throw new RuntimeException(exc);
         } finally {
-          rocksIterator.next();
-          if (!rocksIterator.isValid()) {
-            rocksIterator.close();
-            valid.set(false);
+          if (valid.get()) {
+            rocksIterator.next();
           }
         }
       }

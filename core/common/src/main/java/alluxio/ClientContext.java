@@ -87,6 +87,9 @@ public class ClientContext {
    */
   protected ClientContext(ClientContext ctx) {
     mClusterConf = ctx.getClusterConf();
+    if (!mClusterConf.getBoolean(PropertyKey.CONTEXT_REINITIALIZE_ENABLE)) {
+      mIsPathConfLoaded = true;
+    }
     mPathConf = ctx.getPathConf();
     mUserState = ctx.getUserState();
     mClusterConfHash = ctx.getClusterConfHash();
@@ -103,6 +106,9 @@ public class ClientContext {
       mClusterConf = new InstancedConfiguration(alluxioConf.copyProperties(),
           alluxioConf.clusterDefaultsLoaded());
       mClusterConfHash = alluxioConf.hash();
+      if (!mClusterConf.getBoolean(PropertyKey.CONTEXT_REINITIALIZE_ENABLE)) {
+        mIsPathConfLoaded = true;
+      }
     } else {
       mClusterConf = new InstancedConfiguration(ConfigurationUtils.defaults());
       mClusterConfHash = mClusterConf.hash();
