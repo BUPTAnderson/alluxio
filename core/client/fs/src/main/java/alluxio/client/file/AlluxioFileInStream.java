@@ -97,8 +97,11 @@ public class AlluxioFileInStream extends FileInStream {
 
   private Closer mCloser;
 
+  private long mStart;
+  private boolean mIsShortCircuit;
   protected AlluxioFileInStream(URIStatus status, InStreamOptions options,
       FileSystemContext context) {
+    mStart = System.currentTimeMillis();
     mCloser = Closer.create();
     // Acquire a resource to block FileSystemContext reinitialization, this needs to be done before
     // using mContext.
@@ -233,6 +236,7 @@ public class AlluxioFileInStream extends FileInStream {
     closeBlockInStream(mBlockInStream);
     closeBlockInStream(mCachedPositionedReadStream);
     mCloser.close();
+    LOG.info("++ read path: {}, shortCircuit-{}, cost:{} ms", mStatus.getPath(), mIsShortCircuit, System.currentTimeMillis() - mStart);
   }
 
   /* Bounded Stream methods */
@@ -374,6 +378,7 @@ public class AlluxioFileInStream extends FileInStream {
     } else {
       mBlockInStream = mBlockStore.getInStream(blockInfo, mOptions, mFailedWorkers);
     }
+    mIsShortCircuit = mBlockInStream.isShortCircuit();
     // Set the stream to the correct position.
     long offset = mPosition % mBlockSize;
     mBlockInStream.seek(offset);
